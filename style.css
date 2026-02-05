@@ -100,7 +100,7 @@ body[data-theme="light"] .menu-btn{
   min-width: 0;
   display:flex;
   flex-direction:column;
-  align-items:center;       /* ✅ titolo centrato */
+  align-items:center;
   justify-content:center;
   text-align:center;
 }
@@ -203,7 +203,6 @@ body[data-theme="light"] .search-wrap input::placeholder{ color: rgba(15,23,42,.
 .title-compact{ display:none; }
 .title-full{ display:inline; }
 
-/* quando la ricerca è aperta: compatto ma titolo resta centrato (non spostiamo più a sx) */
 body.search-open .title-full{ display:none; }
 body.search-open .title-compact{ display:inline; }
 body.search-open #subtitle{ display:none; }
@@ -215,7 +214,7 @@ body.search-open #subtitle{ display:none; }
 
 .header-meta-right{
   display:flex;
-  justify-content: space-between; /* ✅ wallet a sx, status a dx */
+  justify-content: space-between;
   align-items:center;
   gap: .6rem;
 }
@@ -283,14 +282,14 @@ body[data-theme="light"] .status-text{ color: rgba(15,23,42,.70); }
 .cards-wrapper{
   display:flex;
   flex-direction: column;
-  gap: var(--gap);              /* ✅ più spazio tra card */
+  gap: var(--gap);
   margin-top: .25rem;
 }
 
 .card{
   background: linear-gradient(135deg, var(--card-dark-a), var(--card-dark-b));
   border-radius: 0.9rem;
-  padding: var(--pad);          /* ✅ più respiro interno */
+  padding: var(--pad);
   box-shadow: 0 20px 70px rgba(0,0,0,.35);
   border: 1px solid rgba(255,255,255,.08);
   position: relative;
@@ -331,7 +330,6 @@ body[data-theme="light"] .sub-row{ color: var(--muted-light); }
   z-index: 2;
 }
 
-/* expand icon: piccola e non invadente */
 .card-expand{
   width: 30px;
   height: 30px;
@@ -474,7 +472,6 @@ body[data-theme="light"] .bar-values{ color: var(--muted-light); }
 .bar-values .center{ position:absolute; left:50%; transform:translateX(-50%); }
 .bar-values .right{ position:absolute; right:0; }
 
-/* stake/reward gradients */
 .stake-container{ height: 26px; }
 .stake-fill{
   background: linear-gradient(90deg, rgba(34,197,94,.55), rgba(16,185,129,.45));
@@ -506,7 +503,7 @@ body[data-theme="light"] .bar-values{ color: var(--muted-light); }
 .chart-overlay{
   position:absolute;
   top: 12px;
-  right: 52px; /* lascia spazio al pulsante expand */
+  right: 52px;
   z-index: 10;
   font-size: 1.05rem;
   font-weight: 900;
@@ -619,7 +616,6 @@ body[data-theme="light"] .reward-timeline-meta{ color: rgba(15,23,42,.68); }
   padding: var(--pad-lg);
 }
 
-/* riga top: titolo + expand */
 .networth-top{
   display:flex;
   align-items:center;
@@ -631,7 +627,6 @@ body[data-theme="light"] .reward-timeline-meta{ color: rgba(15,23,42,.68); }
   font-weight: 950;
 }
 
-/* top2: LIN/LOG + LIVE (sotto) */
 .networth-top2{
   margin-top: .55rem;
   display:flex;
@@ -640,7 +635,6 @@ body[data-theme="light"] .reward-timeline-meta{ color: rgba(15,23,42,.68); }
   gap: .55rem;
 }
 
-/* scale toggle */
 .nw-scale-btn,
 .nw-live-btn{
   height: 32px;
@@ -670,7 +664,6 @@ body[data-theme="light"] .nw-live-btn.active{
 .nw-scale-btn:active,
 .nw-live-btn:active{ transform: translateY(1px); }
 
-/* metrics */
 .networth-metrics{
   margin-top: .85rem;
 }
@@ -691,14 +684,12 @@ body[data-theme="light"] .nw-live-btn.active{
 .networth-pnl.flat{ color: #9ca3af; }
 body[data-theme="light"] .networth-pnl{ color: var(--muted-light); }
 
-/* chart */
 .networth-chart{
   margin-top: 1rem;
   height: 250px;
   position: relative;
 }
 
-/* tf */
 .networth-tf{
   margin-top: .9rem;
 }
@@ -735,7 +726,6 @@ body[data-theme="light"] .tf-btn.active{
   color: rgba(15,23,42,.92);
 }
 
-/* mini asset row */
 .networth-asset{
   margin-top: .85rem;
   padding-top: .75rem;
@@ -770,7 +760,6 @@ body[data-theme="light"] .nw-asset-qty{ color: rgba(59,130,246,.86); }
 .nw-asset-usd{ font-variant-numeric: tabular-nums; }
 .nw-asset-sep{ opacity:.55; }
 
-/* bottom mini boxes */
 .networth-foot{
   margin-top: 1rem;
   display:flex;
@@ -841,7 +830,6 @@ body[data-theme="light"] .nw-mini-sub{ color: rgba(15,23,42,.60); }
   flex-shrink: 0;
 }
 
-/* validator dot */
 .validator-right{
   display:flex;
   align-items:center;
@@ -862,7 +850,6 @@ body[data-theme="light"] .nw-mini-sub{ color: rgba(15,23,42,.60); }
   100%{ transform: scale(1); opacity:.65; }
 }
 
-/* responsive */
 @media (max-width: 520px){
   .networth-usd{ font-size: 1.75rem; }
   .networth-chart{ height: 270px; }
@@ -1417,7 +1404,6 @@ body[data-theme="light"] .pro-pill{
 .cloud-points{ color: rgba(56,189,248,.95); font-weight: 900; }
 
 /* ================= EXPANDED VIEW (fullscreen card) ================= */
-/* il JS userà una classe su body per attivare una modalità fullscreen */
 body.card-expanded{
   overflow: hidden;
 }
@@ -1441,13 +1427,3 @@ body.card-expanded{
 .card.fullscreen canvas{
   height: calc(100% - 40px) !important;
 }
-
-/*
-  ✅ CSS changes summary:
-  - Increased spacing between cards and internal padding for a more “pro” breathing layout
-  - Added page system styles (dashboard/events) and responsive event table wrapper
-  - Added toast notification styling (slide down + auto hide)
-  - Added drawer menu cloud sync section styles + status dot classes
-  - Reduced expand button size and placed it safely inside cards
-  - Added fullscreen card style (JS toggles .fullscreen + body.card-expanded)
-*/
