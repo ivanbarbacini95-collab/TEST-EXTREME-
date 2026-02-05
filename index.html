@@ -1,1 +1,761 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Injective • Portfolio</title>
 
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- BACKDROP + DRAWER -->
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-top">
+      <div class="drawer-title">Menu</div>
+
+      <!-- Toggles: Theme / Live-Refresh / Privacy -->
+      <div class="drawer-toggles" role="group" aria-label="Toggles">
+        <div class="toggle-wrap">
+          <button class="toggle-btn" id="themeToggle" aria-label="Cambia tema">
+            <span id="themeIcon">🌙</span>
+          </button>
+          <div class="toggle-label">Tema</div>
+        </div>
+
+        <div class="toggle-wrap">
+          <button class="toggle-btn" id="liveToggle" aria-label="Modalità Live o Refresh">
+            <span id="liveIcon">📡</span>
+          </button>
+          <div class="toggle-label">Live</div>
+        </div>
+
+        <div class="toggle-wrap">
+          <button class="toggle-btn" id="privacyToggle" aria-label="Nascondi/mostra dati sensibili">
+            <span id="privacyIcon">👁</span>
+          </button>
+          <div class="toggle-label">Privacy</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="drawer-nav" id="drawerNav" aria-label="Navigazione">
+      <button class="nav-item" data-page="home">HOME</button>
+      <button class="nav-item" data-page="market">MARKET</button>
+      <button class="nav-item active" data-page="dashboard">MY DASHBOARD</button>
+
+      <button class="nav-item" data-page="event" id="eventNavItem">
+        EVENT
+        <span class="nav-badge" id="eventsNavBadge" aria-label="Nuovi eventi" hidden>0</span>
+      </button>
+
+      <div class="nav-sep"></div>
+
+      <div class="nav-group">
+        <div class="nav-group-title">TOOLS</div>
+        <button class="nav-item nav-sub" data-page="tools-converter">Injective Converter</button>
+        <button class="nav-item nav-sub" data-page="tools-marketcap">Market Cap Of</button>
+      </div>
+
+      <div class="nav-spacer"></div>
+
+      <button class="nav-item settings-item" data-page="settings">
+        SETTINGS
+        <span class="nav-version">v2.0.2</span>
+      </button>
+    </nav>
+
+    <!-- Footer menu: Mode + Cloud Sync -->
+    <div class="drawer-foot">
+      <div class="drawer-hint" id="modeHint">Mode: LIVE</div>
+
+      <div class="drawer-meta">
+        <div class="drawer-meta-row">
+          <span class="drawer-meta-label">App</span>
+          <span class="drawer-meta-value">v2.0.2</span>
+        </div>
+
+        <div class="drawer-meta-row">
+          <span class="drawer-meta-label">Cloud Sync</span>
+          <span class="drawer-meta-value">
+            <span class="cloud-dot" id="cloudMenuDot" aria-hidden="true"></span>
+            <span id="cloudMenuStatus">—</span>
+          </span>
+        </div>
+
+        <div class="drawer-meta-row">
+          <span class="drawer-meta-label">Last sync</span>
+          <span class="drawer-meta-value" id="cloudMenuLast">—</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- COMING SOON OVERLAY (solo Home/Market) -->
+  <div class="coming-soon" id="comingSoon" aria-hidden="true">
+    <div class="coming-card">
+      <div class="coming-title" id="comingTitle">COMING SOON 🚀</div>
+      <div class="coming-sub" id="comingSub">—</div>
+      <button class="coming-close" id="comingClose" type="button">Chiudi</button>
+    </div>
+  </div>
+
+  <!-- EVENT TOAST (compare dall’alto) -->
+  <div class="toast-host" id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Modal (riusabile): Range / Reset / Conferme -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+
+  <div class="modal" id="modalShell" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="modal-title" id="modalTitle">—</div>
+        <button class="modal-close" id="modalClose" type="button" aria-label="Chiudi">✕</button>
+      </div>
+
+      <div class="modal-body" id="modalBody">
+        <!-- injected by JS -->
+      </div>
+
+      <div class="modal-foot" id="modalFoot">
+        <!-- injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- APP ROOT -->
+  <div class="container loading" id="appRoot">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="header-grid">
+        <div class="header-left">
+          <button class="menu-btn" id="menuBtn" aria-label="Menu">≡</button>
+        </div>
+
+        <!-- TITOLO centrato -->
+        <div class="header-center">
+          <h1 class="brand-title">
+            <span class="title-full">Injective <span class="dot">•</span> Portfolio</span>
+            <span class="title-compact" aria-hidden="true">I<span class="dot">•</span>P</span>
+          </h1>
+          <div class="subtitle" id="subtitle">Realtime staking & rewards dashboard</div>
+        </div>
+
+        <div class="header-right">
+          <div class="search-wrap" id="searchWrap">
+            <button class="icon-btn" id="searchBtn" aria-label="Cerca">🔍</button>
+            <input id="addressInput" placeholder="Enter Injective address (inj...)" autocomplete="off" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner animazione refresh (solo quando NON live, gestito dal JS) -->
+      <div class="refresh-banner" id="refreshBanner" aria-hidden="true">
+        <span class="refresh-spinner" aria-hidden="true"></span>
+        <span class="refresh-text" id="refreshText">Refreshing…</span>
+      </div>
+
+      <div class="header-meta-right">
+        <!-- Wallet “in evidenza” + copia -->
+        <div id="addressDisplay" class="address-display" aria-label="Indirizzo osservato">
+          <span class="address-short" id="addressShort" title="">—</span>
+          <button class="icon-btn address-copy" id="addressCopyBtn" type="button" aria-label="Copia indirizzo">⧉</button>
+        </div>
+
+        <div class="connection-status" id="connectionStatus">
+          <span class="status-dot" id="statusDot"></span>
+          <span class="status-text" id="statusText">Offline</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGES -->
+    <main class="pages" id="pages">
+
+      <!-- ========== DASHBOARD PAGE ========== -->
+      <section class="page page-dashboard active" id="pageDashboard" data-page="dashboard" aria-hidden="false">
+        <div class="cards-wrapper">
+
+          <!-- 1) NET WORTH -->
+          <div class="card networth-card" id="netWorthCard">
+            <div class="networth-top">
+              <div class="label networth-title">Net Worth</div>
+
+              <!-- expand icon (piccola, non invade) -->
+              <button class="card-expand" id="nwExpand" type="button" aria-label="Expand Net Worth">⤢</button>
+            </div>
+
+            <div class="networth-metrics">
+              <div class="networth-usd-row">
+                <div class="networth-usd" id="netWorthUsd">$0.00</div>
+                <!-- ✅ solo qui (vicino al prezzo): LIN/LOG -->
+                <button class="nw-scale-btn" id="nwScaleToggle" type="button" aria-label="Scala (lineare/log)">LIN</button>
+              </div>
+              <div class="networth-pnl flat" id="netWorthPnl">PnL: —</div>
+            </div>
+
+            <div class="networth-chart">
+              <canvas id="netWorthChart"></canvas>
+            </div>
+
+            <div class="networth-tf">
+              <div class="tf-switch" id="nwTfSwitch" aria-label="Timeframe Net Worth">
+                <button class="tf-btn active" data-tf="live" type="button" id="tfLiveBtn">LIVE</button>
+                <button class="tf-btn" data-tf="1d" type="button">1D</button>
+                <button class="tf-btn" data-tf="1w" type="button">1W</button>
+                <button class="tf-btn" data-tf="1m" type="button">1M</button>
+                <button class="tf-btn" data-tf="1y" type="button">1Y</button>
+                <button class="tf-btn" data-tf="all" type="button">ALL</button>
+              </div>
+            </div>
+
+            <div class="networth-foot">
+              <!-- box 1: Total owned -->
+              <div class="nw-mini nw-mini-single">
+                <div class="nw-mini-left">
+                  <img
+                    class="nw-coin-logo-img"
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Injective_l.png"
+                    alt="INJ"
+                    loading="lazy"
+                  />
+                  <div class="nw-mini-meta">
+                    <div class="nw-mini-title">INJ</div>
+                    <div class="nw-mini-sub">Total owned (staked + available + rewards)</div>
+                  </div>
+                </div>
+                <div class="nw-mini-right">
+                  <div class="nw-mini-qty" id="netWorthInj" data-sensitive="true">0.0000 INJ</div>
+                </div>
+              </div>
+
+              <!-- box 2: Validator (spostata qui, come richiesto) -->
+              <div class="nw-mini nw-mini-validator" id="validatorCard">
+                <div class="nw-mini-left">
+                  <img
+                    class="nw-coin-logo-img"
+                    src="https://upload.wikimedia.org/wikipedia/commons/3/3d/Injective_l.png"
+                    alt="Validator"
+                    loading="lazy"
+                  />
+                  <div class="nw-mini-meta">
+                    <div class="nw-mini-title">Validator</div>
+                    <div class="nw-mini-sub" id="validatorName" data-sensitive="true">—</div>
+                  </div>
+                </div>
+
+                <div class="nw-mini-right validator-right">
+                  <span class="validator-dot" id="validatorDot" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2) AVAILABLE -->
+          <div class="card">
+            <div class="label">Available</div>
+            <div class="value-row"><span id="available" data-sensitive="true">0.000000</span></div>
+            <div class="sub-row" id="availableUsd" data-sensitive="true">≈ $0.00</div>
+          </div>
+
+          <!-- 3) STAKED -->
+          <div class="card stake-card" id="stakeCard">
+            <div class="card-head">
+              <div class="label">Staked</div>
+              <div class="card-head-tools">
+                <button class="mini-btn" id="stakeScaleToggle" type="button" aria-label="Scala Staked (lineare/log)">LIN</button>
+                <button class="card-expand" id="stakeExpand" type="button" aria-label="Expand Staked">⤢</button>
+              </div>
+            </div>
+
+            <div class="value-row"><span id="stake" data-sensitive="true">0.0000</span></div>
+            <div class="sub-row" id="stakeUsd" data-sensitive="true">≈ $0.00</div>
+
+            <div class="stake-bar-container bar-container stake-container">
+              <button class="bar-gear" id="stakeRangeBtn" type="button" aria-label="Imposta range Staked">⚙️</button>
+              <div id="stakeBar" class="bar-fill stake-fill"></div>
+              <div id="stakeLine" class="bar-line"></div>
+              <span id="stakePercent" class="stake-percent">0%</span>
+            </div>
+
+            <div class="bar-values stake-values">
+              <span id="stakeMin" class="left">0</span>
+              <span id="stakeMax" class="right">1000</span>
+            </div>
+
+            <div class="stake-chart-wrap">
+              <!-- colonna numerica a sinistra (replica Rewards) -->
+              <div class="chart-yaxis" id="stakeYAxis" aria-hidden="true"></div>
+              <canvas id="stakeChart"></canvas>
+            </div>
+
+            <div class="stake-tools">
+              <div class="tf-switch" id="stakeTfSwitch" aria-label="Timeframe Staked">
+                <button class="tf-btn active" data-tf="all" type="button">ALL</button>
+                <button class="tf-btn" data-tf="1d" type="button">1D</button>
+                <button class="tf-btn" data-tf="1w" type="button">1S</button>
+                <button class="tf-btn" data-tf="1m" type="button">1M</button>
+              </div>
+            </div>
+
+            <div class="stake-timeline">
+              <input id="stakeTimeline" type="range" min="0" max="0" value="0" />
+              <div class="stake-timeline-meta" id="stakeTimelineMeta">—</div>
+            </div>
+          </div>
+
+          <!-- 4) REWARDS -->
+          <div class="card reward-card" id="rewardCard">
+            <div class="card-head">
+              <div class="label">Rewards</div>
+              <div class="card-head-tools">
+                <button class="mini-btn" id="rewardScaleToggle" type="button" aria-label="Scala Rewards (lineare/log)">LIN</button>
+                <button class="card-expand" id="rewardExpand" type="button" aria-label="Expand Rewards">⤢</button>
+              </div>
+            </div>
+
+            <div class="value-row"><span id="rewards" data-sensitive="true">0.0000000</span></div>
+            <div class="sub-row" id="rewardsUsd" data-sensitive="true">≈ $0.00</div>
+
+            <div class="reward-bar-container bar-container reward-container">
+              <button class="bar-gear" id="rewardRangeBtn" type="button" aria-label="Imposta range Rewards">⚙️</button>
+              <div id="rewardBar" class="bar-fill reward-fill"></div>
+              <div id="rewardLine" class="bar-line"></div>
+              <span id="rewardPercent" class="reward-percent">0%</span>
+            </div>
+
+            <div class="bar-values reward-values">
+              <span id="rewardMin" class="left">0</span>
+              <span id="rewardMax" class="right">0.1</span>
+            </div>
+
+            <!-- stime reward (orizzontale) -->
+            <div class="reward-estimates" id="rewardEstimates" aria-label="Stime reward">
+              <div class="re-item"><span class="re-k">Daily</span> <span class="re-v" id="rewardDaily" data-sensitive="true">—</span></div>
+              <div class="re-item"><span class="re-k">Weekly</span> <span class="re-v" id="rewardWeekly" data-sensitive="true">—</span></div>
+              <div class="re-item"><span class="re-k">Monthly</span> <span class="re-v" id="rewardMonthly" data-sensitive="true">—</span></div>
+            </div>
+
+            <div class="reward-chart-wrap">
+              <!-- colonna numerica a sinistra -->
+              <div class="chart-yaxis" id="rewardYAxis" aria-hidden="true"></div>
+              <canvas id="rewardChart"></canvas>
+            </div>
+
+            <div class="reward-tools">
+              <div class="tf-switch" id="rewardTfSwitch" aria-label="Timeframe Rewards">
+                <button class="tf-btn active" data-tf="all" type="button">ALL</button>
+                <button class="tf-btn" data-tf="1d" type="button">1D</button>
+                <button class="tf-btn" data-tf="1w" type="button">1S</button>
+                <button class="tf-btn" data-tf="1m" type="button">1M</button>
+              </div>
+
+              <div class="mini-select-wrap">
+                <span class="mini-select-label">Filtro</span>
+                <select id="rewardFilter" class="mini-select" aria-label="Filtro Rewards">
+                  <option value="all">Tutti</option>
+                  <option value="lt:0.05">&lt; 0.05</option>
+                  <option value="gte:0.05">≥ 0.05</option>
+                  <option value="gte:0.1">≥ 0.1</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="reward-timeline">
+              <input id="rewardTimeline" type="range" min="0" max="0" value="0" />
+              <div class="reward-timeline-meta" id="rewardTimelineMeta">—</div>
+            </div>
+          </div>
+
+          <!-- 5) PRICE CHART (ex 1D, ora multi-timeframe + 5m/10m live) -->
+          <div class="card chart-card" id="priceChartCard">
+            <div class="card-head">
+              <div class="label">Price Chart</div>
+              <div class="card-head-tools">
+                <button class="mini-btn" id="priceChartScaleToggle" type="button" aria-label="Scala Price Chart (lineare/log)">LIN</button>
+                <button class="card-expand" id="priceChartExpand" type="button" aria-label="Expand Price Chart">⤢</button>
+              </div>
+            </div>
+
+            <!-- timeframes centrati sopra -->
+            <div class="chart-tf">
+              <div class="tf-switch" id="priceChartTfSwitch" aria-label="Timeframe Price Chart">
+                <button class="tf-btn active" data-tf="live-5m" type="button">LIVE 5m</button>
+                <button class="tf-btn" data-tf="live-10m" type="button">LIVE 10m</button>
+                <button class="tf-btn" data-tf="1d" type="button">1D</button>
+                <button class="tf-btn" data-tf="1w" type="button">1W</button>
+                <button class="tf-btn" data-tf="1m" type="button">1M</button>
+                <button class="tf-btn" data-tf="1y" type="button">1Y</button>
+                <button class="tf-btn" data-tf="all" type="button">ALL</button>
+              </div>
+            </div>
+
+            <div class="chart-overlay" id="chartOverlay">
+              <span id="chartPrice">--</span>
+            </div>
+
+            <canvas id="priceChart"></canvas>
+          </div>
+
+          <!-- 6) INJ PRICE -->
+          <div class="card price-card" id="injPriceCard">
+            <div class="label">INJ Price</div>
+            <div class="value-row"><span id="price" data-sensitive="true">0.0000</span></div>
+
+            <div class="sub-row perf">
+              <span class="arrow" id="arrow24h">►</span>
+              <span class="pct" id="pct24h">0.00%</span>
+            </div>
+            <div class="price-bar-container bar-container">
+              <span class="bar-label">1D</span>
+              <div id="priceBar" class="bar-fill"></div>
+              <div class="open-marker" aria-hidden="true"></div>
+              <div id="priceLine" class="bar-line"></div>
+            </div>
+            <div class="bar-values">
+              <span id="priceMin" class="left">--</span>
+              <span id="priceOpen" class="center">--</span>
+              <span id="priceMax" class="right">--</span>
+            </div>
+
+            <div class="sub-row perf">
+              <span class="arrow" id="arrowWeek">►</span>
+              <span class="pct" id="pctWeek">0.00%</span>
+            </div>
+            <div class="week-bar-container bar-container">
+              <span class="bar-label">1W</span>
+              <div id="weekBar" class="bar-fill"></div>
+              <div class="open-marker" aria-hidden="true"></div>
+              <div id="weekLine" class="bar-line"></div>
+            </div>
+            <div class="bar-values">
+              <span id="weekMin" class="left">--</span>
+              <span id="weekOpen" class="center">--</span>
+              <span id="weekMax" class="right">--</span>
+            </div>
+
+            <div class="sub-row perf">
+              <span class="arrow" id="arrowMonth">►</span>
+              <span class="pct" id="pctMonth">0.00%</span>
+            </div>
+            <div class="month-bar-container bar-container">
+              <span class="bar-label">1M</span>
+              <div id="monthBar" class="bar-fill"></div>
+              <div class="open-marker" aria-hidden="true"></div>
+              <div id="monthLine" class="bar-line"></div>
+            </div>
+            <div class="bar-values">
+              <span id="monthMin" class="left">--</span>
+              <span id="monthOpen" class="center">--</span>
+              <span id="monthMax" class="right">--</span>
+            </div>
+          </div>
+
+          <!-- 7) APR (spostata in fondo + grafico a punti) -->
+          <div class="card apr-card" id="aprCard">
+            <div class="card-head">
+              <div class="label">APR</div>
+              <div class="card-head-tools">
+                <button class="mini-btn" id="aprScaleToggle" type="button" aria-label="Scala APR (lineare/log)">LIN</button>
+                <button class="card-expand" id="aprExpand" type="button" aria-label="Expand APR">⤢</button>
+              </div>
+            </div>
+
+            <div class="value-row"><span id="apr" data-sensitive="true">0%</span></div>
+            <div class="sub-row" id="aprSub" data-sensitive="true">—</div>
+
+            <div class="apr-chart-wrap">
+              <div class="chart-yaxis" id="aprYAxis" aria-hidden="true"></div>
+              <canvas id="aprChart"></canvas>
+            </div>
+
+            <div class="apr-tools">
+              <div class="tf-switch" id="aprTfSwitch" aria-label="Timeframe APR">
+                <button class="tf-btn active" data-tf="all" type="button">ALL</button>
+                <button class="tf-btn" data-tf="1d" type="button">1D</button>
+                <button class="tf-btn" data-tf="1w" type="button">1S</button>
+                <button class="tf-btn" data-tf="1m" type="button">1M</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========== EVENTS PAGE (dedicata) ========== -->
+      <section class="page page-events" id="pageEvents" data-page="event" aria-hidden="true">
+        <div class="events-head">
+          <div class="events-title">
+            <h2>Event</h2>
+            <div class="events-sub">Solo eventi reali dell’indirizzo osservato</div>
+          </div>
+
+          <div class="events-actions">
+            <button class="events-icon" id="eventsFilterBtn" type="button" aria-label="Filtri eventi">⛃</button>
+            <button class="events-clear" id="eventsClearBtn" type="button" aria-label="Reset eventi">Reset</button>
+          </div>
+        </div>
+
+        <!-- pannello filtri -->
+        <div class="events-filters" id="eventsFilters" aria-hidden="true">
+          <div class="ef-head">
+            <div class="ef-title">Filtri</div>
+            <button class="ef-close" id="eventsFilterClose" type="button" aria-label="Chiudi filtri">✕</button>
+          </div>
+
+          <div class="ef-grid">
+            <label class="ef-item"><input type="checkbox" id="efReward" checked> Reward / Withdraw</label>
+            <label class="ef-item"><input type="checkbox" id="efCompound" checked> Compound</label>
+            <label class="ef-item"><input type="checkbox" id="efApr" checked> APR change</label>
+            <label class="ef-item"><input type="checkbox" id="efPrice" checked> Price move</label>
+            <label class="ef-item"><input type="checkbox" id="efFlow" checked> Inflow/Outflow</label>
+          </div>
+
+          <div class="ef-foot">
+            <button class="mini-btn" id="eventsFilterApply" type="button">Applica</button>
+            <button class="mini-btn ghost" id="eventsFilterReset" type="button">Reset filtri</button>
+          </div>
+        </div>
+
+        <div class="events-card">
+          <div class="events-table-wrap" id="eventsTableWrap">
+            <table class="events-table" aria-label="Event table">
+              <thead>
+                <tr>
+                  <th>Event</th>
+                  <th>Date</th>
+                  <th>Details</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="eventsTbody">
+                <!-- rows injected by JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="events-empty" id="eventsEmpty">
+            No events yet. They will appear here automatically.
+          </div>
+
+          <!-- pagination -->
+          <div class="events-pager" id="eventsPager" aria-label="Paginazione eventi" hidden>
+            <button class="pager-btn" id="eventsPrev" type="button">‹</button>
+            <div class="pager-pages" id="eventsPages">
+              <!-- injected by JS: 1 2 3 ... -->
+            </div>
+            <button class="pager-btn" id="eventsNext" type="button">›</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TOOLS: CONVERTER ========== -->
+      <section class="page page-tools" id="pageToolsConverter" data-page="tools-converter" aria-hidden="true">
+        <div class="tools-head">
+          <h2>Injective Converter</h2>
+          <div class="tools-sub">EUR → USD → INJ (real-time)</div>
+        </div>
+
+        <div class="cards-wrapper">
+          <div class="card tools-card" id="converterCard">
+            <div class="label">Convertitore</div>
+
+            <div class="tool-row">
+              <label class="tool-label" for="convEur">Importo EUR</label>
+              <input class="tool-input" id="convEur" type="number" inputmode="decimal" min="0" step="0.01" placeholder="es. 100" />
+            </div>
+
+            <div class="tool-row tool-grid">
+              <div class="tool-kpi">
+                <div class="tool-k">Cambio EUR/USD</div>
+                <div class="tool-v" id="convFx">—</div>
+              </div>
+              <div class="tool-kpi">
+                <div class="tool-k">USD</div>
+                <div class="tool-v" id="convUsd">—</div>
+              </div>
+              <div class="tool-kpi">
+                <div class="tool-k">INJ (al prezzo attuale)</div>
+                <div class="tool-v" id="convInj">—</div>
+              </div>
+            </div>
+
+            <div class="tool-foot">
+              <div class="tool-note">Aggiornato in tempo reale con prezzo INJ e cambio FX.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== TOOLS: MARKET CAP ========== -->
+      <section class="page page-tools" id="pageToolsMarketcap" data-page="tools-marketcap" aria-hidden="true">
+        <div class="tools-head">
+          <h2>Market Cap Of</h2>
+          <div class="tools-sub">Confronta INJ con una capitalizzazione scelta</div>
+        </div>
+
+        <div class="cards-wrapper">
+          <div class="card tools-card" id="marketcapCard">
+            <div class="label">Confronto Capitalizzazione</div>
+
+            <div class="tool-row tool-grid-2">
+              <div>
+                <label class="tool-label" for="mcValue">Market cap</label>
+                <input class="tool-input" id="mcValue" type="number" inputmode="decimal" min="0" step="0.01" placeholder="es. 5" />
+              </div>
+              <div>
+                <label class="tool-label" for="mcUnit">Formato</label>
+                <select class="tool-input" id="mcUnit">
+                  <option value="k">Migliaia (K)</option>
+                  <option value="m" selected>Milioni (M)</option>
+                  <option value="b">Billion (B)</option>
+                  <option value="t">Trillion (T)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="tool-row tool-grid">
+              <div class="tool-kpi">
+                <div class="tool-k">Market cap (USD)</div>
+                <div class="tool-v" id="mcUsd">—</div>
+              </div>
+              <div class="tool-kpi">
+                <div class="tool-k">Prezzo INJ implicito</div>
+                <div class="tool-v" id="mcImpliedPrice">—</div>
+              </div>
+              <div class="tool-kpi">
+                <div class="tool-k">Moltiplicatore vs prezzo attuale</div>
+                <div class="tool-v" id="mcMultiple">—</div>
+              </div>
+            </div>
+
+            <div class="tool-foot">
+              <div class="tool-note">Il calcolo usa supply/circulating supply recuperata in real-time (gestito dal JS).</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SETTINGS PAGE (reale, non più coming soon) ========== -->
+      <section class="page page-settings" id="pageSettings" data-page="settings" aria-hidden="true">
+        <div class="settings-head">
+          <h2>Settings</h2>
+          <div class="settings-sub">Generali • Vedi Opzioni • Advance</div>
+        </div>
+
+        <div class="settings-tabs" role="tablist" aria-label="Sezioni impostazioni">
+          <button class="tab-btn active" id="tabGeneral" data-tab="general" type="button" role="tab" aria-selected="true">Generali</button>
+          <button class="tab-btn" id="tabView" data-tab="view" type="button" role="tab" aria-selected="false">Vedi Opzioni</button>
+          <button class="tab-btn" id="tabAdvance" data-tab="advance" type="button" role="tab" aria-selected="false">Advance</button>
+        </div>
+
+        <div class="settings-panels">
+          <!-- Generali -->
+          <div class="settings-panel active" id="panelGeneral" data-tab="general" role="tabpanel" aria-hidden="false">
+            <div class="card">
+              <div class="label">Generali</div>
+              <div class="settings-row">
+                <div class="settings-k">Privacy (occhio)</div>
+                <div class="settings-v">Nasconde i dati sensibili sostituendoli con *** (percentuali e Net Worth restano visibili).</div>
+              </div>
+              <div class="settings-row">
+                <div class="settings-k">Cloud Sync</div>
+                <div class="settings-v">Stato e ultimo sync visibili nel menu e nel footer.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vedi Opzioni -->
+          <div class="settings-panel" id="panelView" data-tab="view" role="tabpanel" aria-hidden="true">
+            <div class="card">
+              <div class="label">Vedi Opzioni</div>
+
+              <div class="settings-row">
+                <div class="settings-k">Mostra/nascondi dati</div>
+                <div class="settings-v">Usa l’icona 👁 nel menu per mascherare valori numerici.</div>
+              </div>
+
+              <div class="settings-row">
+                <div class="settings-k">Indirizzo in header</div>
+                <div class="settings-v">L’indirizzo resta in formato compatto, con copia rapida.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Advance -->
+          <div class="settings-panel" id="panelAdvance" data-tab="advance" role="tabpanel" aria-hidden="true">
+            <div class="card">
+              <div class="label">Advance • Reset dati (irreversibile)</div>
+
+              <div class="settings-warn">
+                Il reset elimina i dati storici salvati (punti grafici e/o lista eventi) per l’indirizzo attuale.
+                Prima di applicare, verrà richiesta una doppia conferma.
+              </div>
+
+              <div class="settings-checks" role="group" aria-label="Seleziona cosa resettare">
+                <label class="settings-check"><input type="checkbox" id="resetNetWorth"> Net Worth (grafico)</label>
+                <label class="settings-check"><input type="checkbox" id="resetStake"> Staked (punti)</label>
+                <label class="settings-check"><input type="checkbox" id="resetReward"> Rewards (punti)</label>
+                <label class="settings-check"><input type="checkbox" id="resetApr"> APR (punti)</label>
+                <label class="settings-check"><input type="checkbox" id="resetEvents"> Event (lista)</label>
+              </div>
+
+              <div class="settings-apply-row">
+                <button class="mini-btn danger" id="settingsResetApply" type="button">Applica reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== HOME PAGE (placeholder) ========== -->
+      <section class="page page-home" id="pageHome" data-page="home" aria-hidden="true">
+        <!-- contenuto gestito dall’overlay comingSoon -->
+      </section>
+
+      <!-- ========== MARKET PAGE (placeholder) ========== -->
+      <section class="page page-market" id="pageMarket" data-page="market" aria-hidden="true">
+        <!-- contenuto gestito dall’overlay comingSoon -->
+      </section>
+
+    </main>
+
+    <!-- LAST UPDATE in fondo pagina -->
+    <div id="updated" class="last-update">Last update: --:--</div>
+
+    <!-- Footer pro -->
+    <div class="pro-footer" id="proFooter">
+      <span class="pro-pill">INJ Portfolio</span>
+      <span class="pro-dot">•</span>
+      <span class="pro-meta">v2.0.2</span>
+      <span class="pro-dot">•</span>
+      <span class="pro-meta" id="cloudStatus">Cloud: —</span>
+      <span class="pro-meta cloud-points" id="cloudHistory">· 0 pts</span>
+    </div>
+
+  </div>
+
+  <!--
+    ✅ HTML changes (next):
+    - Menu: aggiunta icona Privacy 👁 + labels (Tema/Live/Privacy)
+    - Menu: nuova sezione TOOLS con 2 pagine (Converter + Market Cap Of)
+    - Settings: pagina reale con tabs (Generali / Vedi Opzioni / Advance reset selettivo + doppia conferma via modal)
+    - Header: address compatto sempre visibile + bottone copia (⧉)
+    - Net Worth: scala LIN/LOG vicino al prezzo; rimossa asset-row non essenziale
+    - Staked/Rewards: gear ⚙️ per range; timeframes (ALL/1D/1S/1M); colonna numerica (y-axis) come overlay
+    - Rewards: stime daily/weekly/monthly; live button sostituito da LIN/LOG (via rewardScaleToggle)
+    - Price Chart: multi-timeframe + LIVE 5m/10m + LIN/LOG
+    - APR: spostata in fondo + canvas + timeframes + LIN/LOG
+    - Events: filtri + reset + pagination + badge nel menu
+    - Refresh mode: banner/spinner in header (attivato dal JS)
+  -->
+</body>
+</html>
