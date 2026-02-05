@@ -94,6 +94,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   initMenu();
   initTheme();
+  initCharts();
 });
 
 function loadUserData(addr) {
@@ -139,4 +140,45 @@ function initTheme() {
   });
 }
 
-// More interactive logic and chart drawing will be inserted during the chart implementation phase.
+function initCharts() {
+  const netWorthCtx = document.getElementById('netWorthChart').getContext('2d');
+  window.netWorthChart = new Chart(netWorthCtx, {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: '#facc15', pointRadius: 2, pointHoverRadius: 4 }] },
+    options: {
+      responsive: true,
+      animation: false,
+      scales: {
+        x: { display: true },
+        y: { display: true, beginAtZero: true }
+      },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  const stakeCtx = document.getElementById('stakeChart').getContext('2d');
+  window.stakeChart = new Chart(stakeCtx, {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: '#3b82f6', pointRadius: 2 }] },
+    options: {
+      responsive: true,
+      animation: false,
+      scales: { x: { display: true }, y: { display: true, beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  const rewardCtx = document.getElementById('rewardChart').getContext('2d');
+  window.rewardChart = new Chart(rewardCtx, {
+    type: 'line',
+    data: { labels: [], datasets: [{ data: [], borderColor: '#22c55e', pointRadius: 2 }] },
+    options: {
+      responsive: true,
+      animation: false,
+      scales: { x: { display: true }, y: { display: true, beginAtZero: true } },
+      plugins: { legend: { display: false } }
+    }
+  });
+}
+
+// TO DO: Load data for each chart dynamically in loadUserData
