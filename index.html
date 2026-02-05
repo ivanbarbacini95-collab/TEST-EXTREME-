@@ -45,7 +45,6 @@
         <span>Settings</span>
         <span>›</span>
       </button>
-      <!-- Tools / altre pagine saranno “coming soon” per ora -->
       <button class="nav-item" data-page="tools">
         <span>Tools</span>
         <span>›</span>
@@ -166,7 +165,7 @@
             </div>
             <div class="perf">
               <span id="arrowMonth" class="arrow flat">►</span>
-              <span id="pctMonth" class="pct flat">0.00%</span>
+              <span id="pctMonth" class="pct flat">►</span>
               <span>1M</span>
             </div>
 
@@ -275,12 +274,11 @@
               <span class="right" id="rewardMax">0.0</span>
             </div>
 
-            <!-- REWARD TOOLS -->
             <div class="reward-tools">
               <div class="mini-select-wrap">
                 <span class="mini-select-label">Filter</span>
                 <select class="mini-select" id="rewardFilter">
-                  <option value="0">Tutti</option>
+                  <option value="all">Tutti</option>
                   <option value="0.05">≥ 0.05 INJ</option>
                   <option value="0.1">≥ 0.10 INJ</option>
                 </select>
@@ -288,13 +286,11 @@
               <button class="mini-btn" id="rewardLiveBtn">LIVE VIEW</button>
             </div>
 
-            <!-- TIMELINE -->
             <div class="reward-timeline">
               <input type="range" id="rewardTimeline" min="0" max="0" value="0" />
               <div class="reward-timeline-meta" id="rewardTimelineMeta">—</div>
             </div>
 
-            <!-- GRAFICO REWARD -->
             <div class="reward-chart-wrap">
               <canvas id="rewardChart"></canvas>
             </div>
@@ -312,7 +308,7 @@
 
             <div class="networth-top2">
               <button class="nw-scale-btn" id="nwScaleBtn">LIN</button>
-              <button class="nw-live-btn" id="nwLiveBtn">LIVE</button>
+              <button class="nw-live-btn active" id="nwLiveBtn">LIVE</button>
             </div>
 
             <div class="networth-metrics">
@@ -324,7 +320,6 @@
               <canvas id="netWorthChart"></canvas>
             </div>
 
-            <!-- TIMEFRAME SWITCH -->
             <div class="networth-tf">
               <div class="tf-switch" id="nwTfSwitch">
                 <button class="tf-btn active" data-tf="live">LIVE</button>
@@ -336,7 +331,6 @@
               </div>
             </div>
 
-            <!-- MINI RIGA ASSET -->
             <div class="networth-asset">
               <img
                 src="https://cryptologos.cc/logos/injective-protocol-inj-logo.png"
@@ -350,7 +344,6 @@
               <span class="nw-asset-qty" id="nwInjQty">0.0000</span>
             </div>
 
-            <!-- BOTTOM MINI BOX: TOTAL INJ -->
             <div class="networth-foot">
               <div class="nw-mini">
                 <div class="nw-mini-left">
@@ -367,7 +360,6 @@
                 <div class="nw-mini-right" id="netWorthInj">0.0000 INJ</div>
               </div>
 
-              <!-- VALIDATOR MINI BOX -->
               <div class="nw-mini">
                 <div class="nw-mini-left">
                   <div class="nw-mini-meta">
@@ -439,6 +431,49 @@
           <div class="events-empty" id="eventsEmpty">
             Nessun evento registrato per questo address.
           </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS PAGE (per ora placeholder) -->
+      <section id="pageSettings" class="page">
+        <div class="events-head">
+          <div class="events-title">
+            <h2>Settings</h2>
+            <div class="events-sub">
+              Impostazioni generali, view options e funzioni avanzate (coming soon).
+            </div>
+          </div>
+        </div>
+
+        <div class="events-card">
+          <p style="font-size:0.9rem; margin:0;">
+            Qui andremo a mettere:<br>
+            • <strong>Generali</strong> (tema, privacy, ecc.)<br>
+            • <strong>Vedi Opzioni</strong><br>
+            • <strong>Advance</strong> con reset selettivo dei grafici (Net Worth / Staked / Rewards / APR) con doppia conferma.
+          </p>
+        </div>
+      </section>
+
+      <!-- TOOLS PAGE (per ora placeholder) -->
+      <section id="pageTools" class="page">
+        <div class="events-head">
+          <div class="events-title">
+            <h2>Tools</h2>
+            <div class="events-sub">
+              Sezione strumenti aggiuntivi.
+            </div>
+          </div>
+        </div>
+
+        <div class="events-card">
+          <p style="font-size:0.9rem; margin-top:0;">
+            In questa sezione inseriremo:
+          </p>
+          <ul style="font-size:0.9rem; margin-top:0.25rem;">
+            <li><strong>Injective converter</strong> (EUR/USD → INJ in tempo reale)</li>
+            <li><strong>Market cap of...</strong> per confrontare INJ con capitalizzazioni custom (migliaia/milioni/billion/trillion)</li>
+          </ul>
         </div>
       </section>
 
